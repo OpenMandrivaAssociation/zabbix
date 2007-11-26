@@ -2,7 +2,7 @@
 
 Name:           zabbix
 Version:        1.4.2
-Release:        %mkrel 1
+Release:        %mkrel 2
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
@@ -48,10 +48,12 @@ Requires(pre):		rpm-helper
 Requires(post):		rpm-helper
 Requires(preun):	rpm-helper
 %else
-Requires(pre):		/usr/sbin/useradd
-Requires(post):		/sbin/chkconfig
-Requires(preun):	/sbin/chkconfig
-Requires(preun):	/sbin/service
+# for userdadd:
+Requires(pre):		shadow-utils
+Requires(post):		chkconfig
+Requires(preun):	chkconfig
+# for /sbin/service:
+Requires(preun):	initscripts
 %endif
 
 %description
