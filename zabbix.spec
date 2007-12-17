@@ -16,7 +16,6 @@ Source4:        zabbix-logrotate.in
 Patch:		zabbix-1.4-fixmysqlheaders.patch
 Patch1:		zabbix-1.4-mysqlcflags.patch
 Patch2:		initgroups.patch
-Buildroot:      %{_tmppath}/%{name}-%{version}-root
 
 %define database %{nil}
 %define zdb %{nil}
