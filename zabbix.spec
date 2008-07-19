@@ -8,7 +8,7 @@ Summary:        Open-source monitoring solution for your IT infrastructure
 Group:          Networking/Other
 License:        GPLv2+
 URL:            http://www.zabbix.com/
-Source0:        http://dl.sourceforge.net/sourceforge/%{name}/%{name}-%{version}.tar.gz
+Source0:        http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 Source1:        zabbix-web.conf
 Source2:        zabbix-server.init
 Source3:        zabbix-agent.init
