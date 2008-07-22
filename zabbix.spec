@@ -1,7 +1,7 @@
 %define _localstatedir /var
 
 Name:           zabbix
-Version:        1.4.4
+Version:        1.4.5
 Release:        %mkrel 1
 Summary:        Open-source monitoring solution for your IT infrastructure
 
