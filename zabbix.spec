@@ -1,3 +1,4 @@
+%define _disable_ld_as_needed 1
 %define _localstatedir /var
 
 Name:           zabbix
