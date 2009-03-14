@@ -2,8 +2,8 @@
 %define _localstatedir /var
 
 Name:           zabbix
-Version:        1.4.6
-Release:        %mkrel 2
+Version:        1.6.2
+Release:        %mkrel 1
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
@@ -16,7 +16,6 @@ Source3:        zabbix-agent.init
 Source4:        zabbix-logrotate.in
 Patch:		zabbix-1.4-fixmysqlheaders.patch
 Patch1:		zabbix-1.4-mysqlcflags.patch
-Patch2:		zabbix-1.4-fix-ldap-linking.patch
 Buildroot:      %{_tmppath}/%{name}-%{version}-root
 
 %define database %{nil}
@@ -108,9 +107,8 @@ The php frontend to display the zabbix web interface.
 
 %prep
 %setup -q
-%patch -p1
-%patch1 -p1
-%patch2 -p1
+%patch -p1 -b .mysqlheaders
+%patch1 -p1 -b .mysqlcflags
 perl -pi -e 's/ -static//g' configure
 
 # fix up some lib64 issues
