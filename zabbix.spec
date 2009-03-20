@@ -1,9 +1,10 @@
 %define _disable_ld_as_needed 1
 %define _localstatedir /var
+%define _requires_exceptions pear
 
 Name:           zabbix
 Version:        1.6.2
-Release:        %mkrel 1
+Release:        %mkrel 2
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
