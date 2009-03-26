@@ -4,7 +4,7 @@
 
 Name:           zabbix
 Version:        1.6.2
-Release:        %mkrel 2
+Release:        %mkrel 3
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
@@ -45,6 +45,7 @@ BuildRequires:		net-snmp-devel
 BuildRequires:		openldap-devel, gnutls-devel
 BuildRequires:		libiksemel-devel
 BuildRequires:		libtasn1-devel
+BuildRequires:		curl-devel
 Requires:		logrotate, fping
 %if %{?mdkversion:1}%{?!mdkversion:0}
 Requires(pre):		rpm-helper
