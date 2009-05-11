@@ -3,8 +3,8 @@
 %define _requires_exceptions pear
 
 Name:           zabbix
-Version:        1.6.2
-Release:        %mkrel 3
+Version:        1.6.4
+Release:        %mkrel 1
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
