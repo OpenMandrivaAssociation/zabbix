@@ -4,7 +4,7 @@
 
 Name:           zabbix
 Version:        1.6.6
-Release:        %mkrel 1
+Release:        %mkrel 2
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
