@@ -102,7 +102,7 @@ The zabbix client agent, to be installed on monitored systems.
 %package web
 Summary:        Zabbix Web Frontend
 Group:          Networking/Other
-Requires:       php-%{zdb}, php-gd, apache-mod_php, php-bcmath
+Requires:       php-%{zdb}, php-gd, apache-mod_php, php-bcmath php-sockets
 
 %description web
 The php frontend to display the zabbix web interface.
