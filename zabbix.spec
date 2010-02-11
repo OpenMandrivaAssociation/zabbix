@@ -3,7 +3,7 @@
 %define _requires_exceptions pear
 
 Name:           zabbix
-Version:        1.6.8
+Version:        1.8.1
 Release:        %mkrel 1
 Summary:        Open-source monitoring solution for your IT infrastructure
 
@@ -151,81 +151,81 @@ perl -pi -e 's/ -static//g' configure
 #make %{?_smp_mflags} CFLAGS="$RPM_OPT_FLAGS"
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 # set up some required directories
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/%{name}
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/init.d
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d
-mkdir -p $RPM_BUILD_ROOT%{_datadir}
-mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log/%{name}
-mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/run/%{name}
+mkdir -p %{buildroot}%{_sysconfdir}/%{name}
+mkdir -p %{buildroot}%{_sysconfdir}/init.d
+mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
+mkdir -p %{buildroot}%{_sysconfdir}/httpd/conf.d
+mkdir -p %{buildroot}%{_datadir}
+mkdir -p %{buildroot}%{_localstatedir}/log/%{name}
+mkdir -p %{buildroot}%{_localstatedir}/run/%{name}
 # php frontend
-cp -a frontends/php $RPM_BUILD_ROOT%{_datadir}/%{name}
-mv $RPM_BUILD_ROOT%{_datadir}/%{name}/include/db.inc.php \
-    $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/
+cp -a frontends/php %{buildroot}%{_datadir}/%{name}
+mv %{buildroot}%{_datadir}/%{name}/include/db.inc.php \
+    %{buildroot}%{_sysconfdir}/%{name}/
 ln -s ../../../..%{_sysconfdir}/%{name}/db.inc.php \
-    $RPM_BUILD_ROOT%{_datadir}/%{name}/include/db.inc.php
+    %{buildroot}%{_datadir}/%{name}/include/db.inc.php
 # kill off .htaccess files, options set in SOURCE1
-rm -f $RPM_BUILD_ROOT%{_datadir}/%{name}/include/.htaccess
-rm -f $RPM_BUILD_ROOT%{_datadir}/%{name}/include/classes/.htaccess
+rm -f %{buildroot}%{_datadir}/%{name}/include/.htaccess
+rm -f %{buildroot}%{_datadir}/%{name}/include/classes/.htaccess
 # drop config files in place
-install -m 0644 misc/conf/zabbix_agent.conf $RPM_BUILD_ROOT%{_sysconfdir}/%{name}
-cat misc/conf/zabbix_agentd.conf | sed \
-    -e 's|PidFile=.*|PidFile=%{_localstatedir}/run/zabbix/zabbix_agentd.pid|g' \
-    -e 's|LogFile=.*|LogFile=%{_localstatedir}/log/zabbix/zabbix_agentd.log|g' \
-    > $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/zabbix_agentd.conf
+install -m 0644 misc/conf/%{name}_agent.conf %{buildroot}%{_sysconfdir}/%{name}
+cat misc/conf/%{name}_agentd.conf | sed \
+    -e 's|PidFile=.*|PidFile=%{_localstatedir}/run/%{name}/%{name}_agentd.pid|g' \
+    -e 's|LogFile=.*|LogFile=%{_localstatedir}/log/%{name}/%{name}_agentd.log|g' \
+    > %{buildroot}%{_sysconfdir}/%{name}/%{name}_agentd.conf
 cat misc/conf/zabbix_server.conf | sed \
-    -e 's|PidFile=.*|PidFile=%{_localstatedir}/run/zabbix/zabbix.pid|g' \
-    -e 's|LogFile=.*|LogFile=%{_localstatedir}/log/zabbix/zabbix_server.log|g' \
-    -e 's|AlertScriptsPath=/home/zabbix/bin/|AlertScriptsPath=%{_localstatedir}/lib/zabbix/|g' \
-    -e 's|DBUser=root|DBUser=zabbix|g' \
+    -e 's|PidFile=.*|PidFile=%{_localstatedir}/run/%{name}/%{name}.pid|g' \
+    -e 's|LogFile=.*|LogFile=%{_localstatedir}/log/%{name}/%{name}_server.log|g' \
+    -e 's|AlertScriptsPath=/home/%{name}/bin/|AlertScriptsPath=%{_localstatedir}/lib/%{name}/|g' \
+    -e 's|DBUser=root|DBUser=%{name}|g' \
     -e 's|DBSocket=/tmp/mysql.sock|DBSocket=%{_localstatedir}/lib/%{zdb}/%{zdb}.sock|g' \
-    > $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/zabbix_server.conf
-install -m 0644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/%{name}.conf
+    > %{buildroot}%{_sysconfdir}/%{name}/%{name}_server.conf
+install -m 0644 %{SOURCE1} %{buildroot}%{_sysconfdir}/httpd/conf.d/%{name}.conf
 # log rotation
 cat %{SOURCE4} | sed -e 's|COMPONENT|server|g' > \
-     $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/zabbix
+     %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
 cat %{SOURCE4} | sed -e 's|COMPONENT|agentd|g' > \
-     $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/zabbix-agent
+     %{buildroot}%{_sysconfdir}/logrotate.d/%{name}-agent
 # init scripts
-install -m 0755 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/init.d/zabbix
-install -m 0755 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/init.d/zabbix-agent
+install -m 0755 %{SOURCE2} %{buildroot}%{_sysconfdir}/init.d/%{name}
+install -m 0755 %{SOURCE3} %{buildroot}%{_sysconfdir}/init.d/%{name}-agent
 
-make DESTDIR=$RPM_BUILD_ROOT install
-rm -rf $RPM_BUILD_ROOT%{_libdir}/libzbx*.a
+make DESTDIR=%{buildroot} install
+rm -rf %{buildroot}%{_libdir}/libzbx*.a
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %pre
 # Add the "zabbix" user
 /usr/sbin/useradd -c "Zabbix Monitoring System" \
-        -s /sbin/nologin -r -d %{_localstatedir}/lib/%{name} zabbix 2> /dev/null || :
+        -s /sbin/nologin -r -d %{_localstatedir}/lib/%{name} %{name} 2> /dev/null || :
 
 %pre agent
 # Add the "zabbix" user
 /usr/sbin/useradd -c "Zabbix Monitoring System" \
-        -s /sbin/nologin -r -d %{_localstatedir}/lib/%{name} zabbix 2> /dev/null || :
+        -s /sbin/nologin -r -d %{_localstatedir}/lib/%{name} %{name} 2> /dev/null || :
 
 %post
-/sbin/chkconfig --add zabbix
+/sbin/chkconfig --add %{name}
 
 %post agent
-/sbin/chkconfig --add zabbix-agent
+/sbin/chkconfig --add %{name}-agent
 
 %preun
 if [ "$1" = 0 ]
 then
-  /sbin/service zabbix stop >/dev/null 2>&1 || :
-  /sbin/chkconfig --del zabbix
+  /sbin/service %{name} stop >/dev/null 2>&1 || :
+  /sbin/chkconfig --del %{name}
 fi
 
 %preun agent
 if [ "$1" = 0 ]
 then
-  /sbin/service zabbix-agent stop >/dev/null 2>&1 || :
-  /sbin/chkconfig --del zabbix-agent
+  /sbin/service %{name}-agent stop >/dev/null 2>&1 || :
+  /sbin/chkconfig --del %{name}-agent
 fi
 
 %files
@@ -233,27 +233,31 @@ fi
 %doc AUTHORS ChangeLog COPYING FAQ NEWS README
 %doc create
 %dir %{_sysconfdir}/%{name}
-%{_sbindir}/zabbix_server
-%{_sysconfdir}/init.d/zabbix
+%{_sbindir}/%{name}_server
+%{_sysconfdir}/init.d/%{name}
+%{_mandir}/man8/%{name}_server.8*
 %config(noreplace) %{_sysconfdir}/logrotate.d/zabbix
-%config(noreplace) %{_sysconfdir}/%{name}/zabbix_server.conf
-%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/log/%{name}
-%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/run/%{name}
+%config(noreplace) %{_sysconfdir}/%{name}/%{name}_server.conf
+%attr(0755,%{name},%{name}) %dir %{_localstatedir}/log/%{name}
+%attr(0755,%{name},%{name}) %dir %{_localstatedir}/run/%{name}
 
 %files agent
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING FAQ NEWS README
 %dir %{_sysconfdir}/%{name}
-%{_sbindir}/zabbix_agent
-%{_sbindir}/zabbix_agentd
-%{_sbindir}/zabbix_sender
-%{_sbindir}/zabbix_get
-%{_sysconfdir}/init.d/zabbix-agent
-%config(noreplace) %{_sysconfdir}/logrotate.d/zabbix-agent
-%config(noreplace) %{_sysconfdir}/%{name}/zabbix_agent.conf
-%config(noreplace) %{_sysconfdir}/%{name}/zabbix_agentd.conf
-%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/log/%{name}
-%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/run/%{name}
+%{_bindir}/%{name}_sender
+%{_bindir}/%{name}_get
+%{_sbindir}/%{name}_agent
+%{_sbindir}/%{name}_agentd
+%{_mandir}/man1/%{name}_sender.1*
+%{_mandir}/man1/%{name}_get.1*
+%{_mandir}/man8/%{name}_agentd.8*
+%{_sysconfdir}/init.d/%{name}-agent
+%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}-agent
+%config(noreplace) %{_sysconfdir}/%{name}/%{name}_agent.conf
+%config(noreplace) %{_sysconfdir}/%{name}/%{name}_agentd.conf
+%attr(0755,%{name},%{name}) %dir %{_localstatedir}/log/%{name}
+%attr(0755,%{name},%{name}) %dir %{_localstatedir}/run/%{name}
 
 %files web
 %defattr(-,root,root,-)
