@@ -4,7 +4,7 @@
 
 Name:           zabbix
 Version:        1.8.2
-Release:        %mkrel 2
+Release:        %mkrel 3
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
@@ -181,6 +181,7 @@ cat misc/conf/zabbix_server.conf | sed \
     -e 's|AlertScriptsPath=/home/%{name}/bin/|AlertScriptsPath=%{_localstatedir}/lib/%{name}/|g' \
     -e 's|DBUser=root|DBUser=%{name}|g' \
     -e 's|DBSocket=/tmp/mysql.sock|DBSocket=%{_localstatedir}/lib/%{zdb}/%{zdb}.sock|g' \
+    -e 's|FpingLocation=/usr/sbin/fping|FpingLocation=/bin/fping|g' \
     > %{buildroot}%{_sysconfdir}/%{name}/%{name}_server.conf
 install -m 0644 %{SOURCE1} %{buildroot}%{_sysconfdir}/httpd/conf.d/%{name}.conf
 # log rotation
