@@ -3,8 +3,8 @@
 %define _requires_exceptions pear
 
 Name:           zabbix
-Version:        1.8.2
-Release:        %mkrel 3
+Version:        1.8.3
+Release:        %mkrel 1
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
@@ -231,7 +231,7 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING FAQ NEWS README
+%doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 %doc create
 %dir %{_sysconfdir}/%{name}
 %{_sbindir}/%{name}_server
@@ -244,7 +244,7 @@ fi
 
 %files agent
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING FAQ NEWS README
+%doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 %dir %{_sysconfdir}/%{name}
 %{_bindir}/%{name}_sender
 %{_bindir}/%{name}_get
