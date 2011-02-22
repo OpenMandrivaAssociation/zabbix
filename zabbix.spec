@@ -3,7 +3,7 @@
 %define _requires_exceptions pear
 
 Name:           zabbix
-Version:        1.8.3
+Version:        1.8.4
 Release:        %mkrel 4
 Summary:        Open-source monitoring solution for your IT infrastructure
 
@@ -15,7 +15,7 @@ Source1:        zabbix-web.conf
 Source2:        zabbix-server.init
 Source3:        zabbix-agent.init
 Source4:        zabbix-logrotate.in
-Patch:		zabbix-1.4-fixmysqlheaders.patch
+Patch0:		zabbix-1.4-fixmysqlheaders.patch
 Patch1:		zabbix-1.4-mysqlcflags.patch
 Buildroot:      %{_tmppath}/%{name}-%{version}-root
 
@@ -109,7 +109,7 @@ The php frontend to display the zabbix web interface.
 
 %prep
 %setup -q
-%patch -p1 -b .mysqlheaders
+#patch0 -p1 -b .mysqlheaders
 %patch1 -p1 -b .mysqlcflags
 perl -pi -e 's/ -static//g' configure
 
