@@ -3,8 +3,8 @@
 %define _requires_exceptions pear
 
 Name:           zabbix
-Version:        1.8.4
-Release:        %mkrel 6
+Version:        1.8.11
+Release:        1
 Summary:        Open-source monitoring solution for your IT infrastructure
 
 Group:          Networking/Other
@@ -17,7 +17,6 @@ Source3:        zabbix-agent.init
 Source4:        zabbix-logrotate.in
 Patch0:		zabbix-1.4-fixmysqlheaders.patch
 Patch1:		zabbix-1.4-mysqlcflags.patch
-Buildroot:      %{_tmppath}/%{name}-%{version}-root
 
 %define database %{nil}
 %define zdb %{nil}
@@ -110,7 +109,7 @@ The php frontend to display the zabbix web interface.
 %prep
 %setup -q
 #patch0 -p1 -b .mysqlheaders
-%patch1 -p1 -b .mysqlcflags
+#%patch1 -p1 -b .mysqlcflags
 perl -pi -e 's/ -static//g' configure
 
 # fix up some lib64 issues
@@ -151,7 +150,6 @@ perl -pi -e 's/ -static//g' configure
 #make %{?_smp_mflags} CFLAGS="$RPM_OPT_FLAGS"
 
 %install
-rm -rf %{buildroot}
 # set up some required directories
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 mkdir -p %{buildroot}%{_sysconfdir}/init.d
@@ -193,11 +191,8 @@ cat %{SOURCE4} | sed -e 's|COMPONENT|agentd|g' > \
 install -m 0755 %{SOURCE2} %{buildroot}%{_sysconfdir}/init.d/%{name}
 install -m 0755 %{SOURCE3} %{buildroot}%{_sysconfdir}/init.d/%{name}-agent
 
-make DESTDIR=%{buildroot} install
+%makeinstall_std
 rm -rf %{buildroot}%{_libdir}/libzbx*.a
-
-%clean
-rm -rf %{buildroot}
 
 %pre
 # Add the "zabbix" user
@@ -230,7 +225,6 @@ then
 fi
 
 %files
-%defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 %doc create
 %dir %{_sysconfdir}/%{name}
@@ -243,7 +237,6 @@ fi
 %attr(0755,%{name},%{name}) %dir %{_localstatedir}/run/%{name}
 
 %files agent
-%defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 %dir %{_sysconfdir}/%{name}
 %{_bindir}/%{name}_sender
@@ -261,10 +254,8 @@ fi
 %attr(0755,%{name},%{name}) %dir %{_localstatedir}/run/%{name}
 
 %files web
-%defattr(-,root,root,-)
 %doc README
 %dir %{_sysconfdir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}/db.inc.php
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}.conf
 %{_datadir}/%{name}
-
