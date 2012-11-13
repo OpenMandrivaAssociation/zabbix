@@ -1,0 +1,5 @@
+zabbix-1.8.11.tar.gz
+zabbix-agent.init
+zabbix-logrotate.in
+zabbix-server.init
+zabbix-web.conf
