@@ -1,0 +1,13 @@
+diff -up zabbix-2.0.1/frontends/php/include/config.inc.php.orig zabbix-2.0.1/frontends/php/include/config.inc.php
+--- zabbix-2.0.1/frontends/php/include/config.inc.php.orig	2012-06-27 23:03:03.000000000 +0200
++++ zabbix-2.0.1/frontends/php/include/config.inc.php	2012-07-12 16:17:32.000000000 +0200
+@@ -64,8 +64,7 @@ $USER_DETAILS = array();
+ $USER_RIGHTS = array();
+ $ZBX_LOCALNODEID = 0;
+ $ZBX_LOCMASTERID = 0;
+-$ZBX_CONFIGURATION_FILE = './conf/zabbix.conf.php';
+-$ZBX_CONFIGURATION_FILE = realpath(dirname($ZBX_CONFIGURATION_FILE)).DIRECTORY_SEPARATOR.basename($ZBX_CONFIGURATION_FILE);
++$ZBX_CONFIGURATION_FILE = '/etc/zabbix/web/zabbix.conf.php';
+ 
+ // include tactical overview modules
+ require_once dirname(__FILE__).'/locales.inc.php';

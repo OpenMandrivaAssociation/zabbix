@@ -1,0 +1,11 @@
+diff -up zabbix-2.0.1/frontends/php/include/screens.inc.php.orig zabbix-2.0.1/frontends/php/include/screens.inc.php
+--- zabbix-2.0.1/frontends/php/include/screens.inc.php.orig	2012-06-27 23:03:03.000000000 +0200
++++ zabbix-2.0.1/frontends/php/include/screens.inc.php	2012-07-12 16:29:02.000000000 +0200
+@@ -25,7 +25,6 @@ require_once dirname(__FILE__).'/js.inc.
+ 
+ function screen_resources($resource = null) {
+ 	$resources = array(
+-		SCREEN_RESOURCE_CLOCK => _('Clock'),
+ 		SCREEN_RESOURCE_DATA_OVERVIEW => _('Data overview'),
+ 		SCREEN_RESOURCE_GRAPH => _('Graph'),
+ 		SCREEN_RESOURCE_ACTIONS => _('History of actions'),

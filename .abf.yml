@@ -1,6 +1,3 @@
 sources:
-  "zabbix-1.8.11.tar.gz:"	2efb94e0b57f1ddbb38ef3f8da225d88effb0689
-  "zabbix-agent.init:"	9bac851a7e375e348280e57648a502a6915f4b48
-  "zabbix-logrotate.in:"	3b2ee91ecdceadc0019b70689d4704ba1df0ca72
-  "zabbix-server.init:"	7a920f45be05d9e5781c70adbf2378f3710523d1
-  "zabbix-web.conf:"	890f6e35188062a23908a9043bf882058ef58477
+  "zabbix-2.0.1-free.tar.gz": f89cd75d92e5c9e8be8067742c26930131310b07
+  "zabbix-2.0.3.tar.gz": be8902444890db9fb2c4795e62073ce7eea32d96
