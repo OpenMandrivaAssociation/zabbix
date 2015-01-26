@@ -83,7 +83,6 @@ multitude of servers.
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/zabbix.conf
 %attr(0755,zabbix,zabbix) %dir %{_localstatedir}/lib/%{srcname}
 %attr(0755,zabbix,zabbix) %dir %{_localstatedir}/log/%{srcname}
-%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/run/%{srcname}
 %{_bindir}/zabbix_get
 %{_bindir}/zabbix_sender
 %{_mandir}/man1/zabbix_get.1*
