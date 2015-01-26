@@ -7,60 +7,57 @@
 
 %global srcname zabbix
 
-Name:           zabbix
-Version:        2.0.1
-Release:        1
-Summary:        Open-source monitoring solution for your IT infrastructure
-
-Group:          Monitoring
-License:        GPLv2+
-URL:            http://www.zabbix.com/
-Source0:        http://downloads.sourceforge.net/%{srcname}/%{srcname}-%{version}-free.tar.gz
+Summary:	Open-source monitoring solution for your IT infrastructure
+Name:		zabbix
+Version:	2.0.14
+Release:	1
+License:	GPLv2+
+Group:		Monitoring
+Url:		http://www.zabbix.com/
+Source0:	http://downloads.sourceforge.net/%{srcname}/%{srcname}-%{version}.tar.gz
 # upstream tarball minus src/zabbix_java/lib/org-json-2010-12-28.jar
-#Source0:        %{srcname}-%{version}-free.tar.gz
-Source1:        zabbix-web.conf
-Source5:        zabbix-logrotate.in
+#Source0:	%{srcname}-%{version}-free.tar.gz
+Source1:	zabbix-web.conf
+Source5:	zabbix-logrotate.in
 # tmpfiles for F >= 15 mandriva >= 2012
-Source9:        zabbix-tmpfiles.conf
+Source9:	zabbix-tmpfiles.conf
 # systemd units
-Source10:       zabbix-agent.service
-Source11:       zabbix-proxy-mysql.service
-Source12:       zabbix-proxy-pgsql.service
-Source13:       zabbix-proxy-sqlite3.service
-Source14:       zabbix-server-mysql.service
-Source15:       zabbix-server-pgsql.service
-Source16:       zabbix-server-sqlite3.service
+Source10:	zabbix-agent.service
+Source11:	zabbix-proxy-mysql.service
+Source12:	zabbix-proxy-pgsql.service
+Source13:	zabbix-proxy-sqlite3.service
+Source14:	zabbix-server-mysql.service
+Source15:	zabbix-server-pgsql.service
+Source16:	zabbix-server-sqlite3.service
 
 # local rules for config files
-Patch0:         zabbix-2.0.1-config.patch
+Patch0:		zabbix-2.0.1-config.patch
 # local rules for config files - fonts
-Patch1:         zabbix-2.0.1-fonts-config.patch
+Patch1:		zabbix-2.0.14-fonts-config.patch
 # remove flash content (#737337)
 # https://support.zabbix.com/browse/ZBX-4794
-Patch2:         zabbix-2.0.1-no-flash.patch
+Patch2:		zabbix-2.0.1-no-flash.patch
 # adapt for fping3 - https://support.zabbix.com/browse/ZBX-4894
-Patch3:         zabbix-1.8.12-fping3.patch
+Patch3:		zabbix-1.8.12-fping3.patch
 
-BuildRequires:   mysql-devel
-BuildRequires:   postgresql-devel
-BuildRequires:   net-snmp-devel
-#BuildRequires:   openldap-devel
-BuildRequires:   pkgconfig(gnutls)
-BuildRequires:   pkgconfig(iksemel)
-BuildRequires:   pkgconfig(sqlite3)
-BuildRequires:   unixODBC-devel
-BuildRequires:   pkgconfig(libcurl)
-BuildRequires:   pkgconfig(OpenIPMI)
-BuildRequires:   pkgconfig(libssh2)
-BuildRequires:   systemd-units
+BuildRequires:	systemd-units
+BuildRequires:	mysql-devel
+BuildRequires:	net-snmp-devel
+#BuildRequires:	openldap-devel
+BuildRequires:	unixODBC-devel
+BuildRequires:	pkgconfig(gnutls)
+BuildRequires:	pkgconfig(iksemel)
+BuildRequires:	pkgconfig(libcurl)
+BuildRequires:	pkgconfig(libpq)
+BuildRequires:	pkgconfig(libssh2)
+BuildRequires:	pkgconfig(OpenIPMI)
+BuildRequires:	pkgconfig(sqlite3)
 
-Requires:        logrotate
-Requires(pre):   shadow-utils
+Requires:	logrotate
+Requires(pre):	shadow-utils
 %if %{srcname} != %{name}
-Conflicts:       %{srcname}
+Conflicts:	%{srcname}
 %endif
-
-Obsoletes:       %{name}-docs < 1.8.9
 
 %description
 ZABBIX is software that monitors numerous parameters of a network and
@@ -80,183 +77,405 @@ monitoring IT infrastructure. This is equally true for small
 organisations with a few servers and for large companies with a
 multitude of servers.
 
+%files
+%doc AUTHORS ChangeLog COPYING NEWS README
+%dir %{_sysconfdir}/%{srcname}
+%config(noreplace) %{_sysconfdir}/tmpfiles.d/zabbix.conf
+%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/lib/%{srcname}
+%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/log/%{srcname}
+%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/run/%{srcname}
+%{_bindir}/zabbix_get
+%{_bindir}/zabbix_sender
+%{_mandir}/man1/zabbix_get.1*
+%{_mandir}/man1/zabbix_sender.1*
+
+%pre
+getent group zabbix > /dev/null || groupadd -r zabbix
+getent passwd zabbix > /dev/null || \
+    useradd -r -g zabbix -d %{_localstatedir}/lib/%{srcname} -s /sbin/nologin \
+    -c "Zabbix Monitoring System" zabbix
+:
+
+#----------------------------------------------------------------------------
+
 %package server
-Summary:         Zabbix server common files
-Group:           Monitoring
-Requires:        %{name} = %{version}-%{release}
-Requires:        %{name}-server-implementation = %{version}-%{release}
-Requires:        fping
-Requires:        traceroute
-Requires(post):  /sbin/chkconfig
-Requires(preun): /sbin/chkconfig
-Requires(preun): /sbin/service
+Summary:	Zabbix server common files
+Group:		Monitoring
+Requires:	%{name} = %{EVRD}
+Requires:	%{name}-server-implementation = %{EVRD}
+Requires:	fping
+Requires:	traceroute
 
 %description server
 Zabbix server common files
 
+%files server
+%doc misc/snmptrap/zabbix_trap_receiver.pl
+%attr(0640,root,zabbix) %config(noreplace) %{_sysconfdir}/zabbix_server.conf
+%{_sysconfdir}/%{srcname}/zabbix_server.conf
+%attr(0755,zabbix,zabbix) %dir %{_sysconfdir}/%{srcname}/externalscripts
+%config(noreplace) %{_sysconfdir}/logrotate.d/zabbix-server
+%ghost %{_unitdir}/zabbix-server.service
+%{_mandir}/man8/zabbix_server.8*
+
+#----------------------------------------------------------------------------
+
 %package server-mysql
-Summary:         Zabbix server compiled to use MySQL
-Group:           Monitoring
-Requires:        %{name} = %{version}-%{release}
-Requires:        %{name}-server = %{version}-%{release}
-Requires(post):  systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Provides:        %{name}-server-implementation = %{version}-%{release}
-Conflicts:       %{name}-server-pgsql
-Conflicts:       %{name}-server-sqlite3
+Summary:	Zabbix server compiled to use MySQL
+Group:		Monitoring
+Requires:	%{name} = %{EVRD}
+Requires:	%{name}-server = %{EVRD}
+Requires(post,preun,postun):	systemd-units
+Provides:	%{name}-server-implementation = %{EVRD}
+Conflicts:	%{name}-server-pgsql
+Conflicts:	%{name}-server-sqlite3
 
 %description server-mysql
-Zabbix server compiled to use MySQL
+Zabbix server compiled to use MySQL.
+
+%files server-mysql
+%{_docdir}/%{srcname}-server-mysql-%{version}/
+%{_sbindir}/zabbix_server_mysql
+%{_unitdir}/zabbix-server-mysql.service
+
+%post server-mysql
+if [ $1 -eq 1 ] ; then
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+ln -sf %{_unitdir}/zabbix-server-mysql.service %{_unitdir}/zabbix-server.service
+
+%preun server-mysql
+if [ $1 -eq 0 ] ; then
+    /bin/systemctl --no-reload disable zabbix-server-mysql.service > /dev/null 2>&1 || :
+    /bin/systemctl stop zabbix-server-mysql.service > /dev/null 2>&1 || :
+fi
+
+%postun server-mysql
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    /bin/systemctl try-restart zabbix-server-mysql.service >/dev/null 2>&1 || :
+fi
+
+#----------------------------------------------------------------------------
 
 %package server-pgsql
-Summary:         Zabbix server compiled to use PostgresSQL
-Group:           Monitoring
-Requires:        %{name} = %{version}-%{release}
-Requires:        %{name}-server = %{version}-%{release}
-Requires(post):  systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Provides:        %{name}-server-implementation = %{version}-%{release}
-Conflicts:       %{name}-server-mysql
-Conflicts:       %{name}-server-sqlite3
+Summary:	Zabbix server compiled to use PostgresSQL
+Group:		Monitoring
+Requires:	%{name} = %{EVRD}
+Requires:	%{name}-server = %{EVRD}
+Requires(post,preun,postun):	systemd-units
+Provides:	%{name}-server-implementation = %{EVRD}
+Conflicts:	%{name}-server-mysql
+Conflicts:	%{name}-server-sqlite3
 
 %description server-pgsql
-Zabbix server compiled to use PostgresSQL
+Zabbix server compiled to use PostgresSQL.
+
+%post server-pgsql
+if [ $1 -eq 1 ] ; then
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+ln -sf %{_unitdir}/zabbix-server-pgsql.service %{_unitdir}/zabbix-server.service
+
+%files server-pgsql
+%{_docdir}/%{srcname}-server-pgsql-%{version}/
+%{_sbindir}/zabbix_server_pgsql
+%{_unitdir}/zabbix-server-pgsql.service
+
+%preun server-pgsql
+if [ $1 -eq 0 ] ; then
+    /bin/systemctl --no-reload disable zabbix-server-pgsql.service > /dev/null 2>&1 || :
+    /bin/systemctl stop zabbix-server-pgsql.service > /dev/null 2>&1 || :
+fi
+
+%postun server-pgsql
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    /bin/systemctl try-restart zabbix-server-pgsql.service >/dev/null 2>&1 || :
+fi
+
+#----------------------------------------------------------------------------
 
 %package server-sqlite3
-Summary:         Zabbix server compiled to use SQLite
-Group:           Monitoring
-Requires:        %{name} = %{version}-%{release}
-Requires:        %{name}-server = %{version}-%{release}
-Requires(post):  systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Provides:        %{name}-server-implementation = %{version}-%{release}
-Conflicts:       %{name}-server-mysql
-Conflicts:       %{name}-server-pgsql
+Summary:	Zabbix server compiled to use SQLite
+Group:		Monitoring
+Requires:	%{name} = %{EVRD}
+Requires:	%{name}-server = %{EVRD}
+Requires(post,preun,postun):	systemd-units
+Provides:	%{name}-server-implementation = %{EVRD}
+Conflicts:	%{name}-server-mysql
+Conflicts:	%{name}-server-pgsql
 
 %description server-sqlite3
-Zabbix server compiled to use SQLite
+Zabbix server compiled to use SQLite.
+
+%files server-sqlite3
+%{_docdir}/%{srcname}-server-sqlite3-%{version}/
+%{_sbindir}/zabbix_server_sqlite3
+%{_unitdir}/zabbix-server-sqlite3.service
+
+%post server-sqlite3
+if [ $1 -eq 1 ] ; then
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+ln -sf %{_unitdir}/zabbix-server-sqlite3.service %{_unitdir}/zabbix-server.service
+
+%preun server-sqlite3
+if [ $1 -eq 0 ] ; then
+    /bin/systemctl --no-reload disable zabbix-server-sqlite3.service > /dev/null 2>&1 || :
+    /bin/systemctl stop zabbix-server-sqlite3.service > /dev/null 2>&1 || :
+fi
+
+%postun server-sqlite3
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    /bin/systemctl try-restart zabbix-server-sqlite3.service >/dev/null 2>&1 || :
+fi
+
+#----------------------------------------------------------------------------
 
 %package agent
-Summary:         Zabbix Agent
-Group:           Monitoring
-Requires:        %{name} = %{version}-%{release}
-Requires(post):  systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
+Summary:	Zabbix Agent
+Group:		Monitoring
+Requires:	%{name} = %{EVRD}
+Requires(post,preun,postun):	systemd-units
 
 %description agent
 The Zabbix client agent, to be installed on monitored systems.
 
+%files agent
+%doc conf/zabbix_agentd/*.conf
+%config(noreplace) %{_sysconfdir}/zabbix_agent.conf
+%{_sysconfdir}/%{srcname}/zabbix_agent.conf
+%config(noreplace) %{_sysconfdir}/zabbix_agentd.conf
+%{_sysconfdir}/%{srcname}/zabbix_agentd.conf
+%config(noreplace) %{_sysconfdir}/logrotate.d/zabbix-agent
+%{_unitdir}/zabbix-agent.service
+%{_sbindir}/zabbix_agent
+%{_sbindir}/zabbix_agentd
+%{_mandir}/man8/zabbix_agentd.8*
+
+%post agent
+if [ $1 -eq 1 ] ; then
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+
+%preun agent
+if [ $1 -eq 0 ] ; then
+    /bin/systemctl --no-reload disable zabbix-agent.service > /dev/null 2>&1 || :
+    /bin/systemctl stop zabbix-agent.service > /dev/null 2>&1 || :
+fi
+
+%postun agent
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    /bin/systemctl try-restart zabbix-agent.service >/dev/null 2>&1 || :
+fi
+
+#----------------------------------------------------------------------------
+
 %package proxy
-Summary:         Zabbix Proxy
-Group:           Monitoring
-Requires:        %{name} = %{version}-%{release}
-Requires:        %{name}-proxy-implementation = %{version}-%{release}
-Requires(post):  /sbin/chkconfig
-Requires(preun): /sbin/chkconfig
-Requires(preun): /sbin/service
-Requires:        fping
+Summary:	Zabbix Proxy
+Group:		Monitoring
+Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}-proxy-implementation = %{EVRD}
+Requires:	fping
 
 %description proxy
-The Zabbix proxy
+The Zabbix proxy.
+
+%files proxy
+%doc misc/snmptrap/zabbix_trap_receiver.pl
+%attr(0640,root,zabbix) %config(noreplace) %{_sysconfdir}/zabbix_proxy.conf
+%{_sysconfdir}/%{srcname}/zabbix_proxy.conf
+%attr(0755,zabbix,zabbix) %dir %{_sysconfdir}/%{srcname}/externalscripts
+%config(noreplace) %{_sysconfdir}/logrotate.d/zabbix-proxy
+%ghost %{_unitdir}/zabbix-proxy.service
+%{_mandir}/man8/zabbix_proxy.8*
+
+#----------------------------------------------------------------------------
 
 %package proxy-mysql
-Summary:         Zabbix proxy compiled to use MySQL
-Group:           Monitoring
-Requires:        %{name}-proxy = %{version}-%{release}
-Requires(post):  systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Provides:        %{name}-proxy-implementation = %{version}-%{release}
+Summary:	Zabbix proxy compiled to use MySQL
+Group:		Monitoring
+Requires:	%{name}-proxy = %{EVRD}
+Requires(post,preun,postun):	systemd-units
+Provides:	%{name}-proxy-implementation = %{EVRD}
 
 %description proxy-mysql
-The Zabbix proxy compiled to use MySQL
+The Zabbix proxy compiled to use MySQL.
+
+%files proxy-mysql
+%{_docdir}/%{srcname}-proxy-mysql-%{version}/
+%{_sbindir}/zabbix_proxy_mysql
+%{_unitdir}/zabbix-proxy-mysql.service
+
+%post proxy-mysql
+if [ $1 -eq 1 ] ; then
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+ln -sf %{_unitdir}/zabbix-proxy-mysql.service %{_unitdir}/zabbix-proxy.service
+
+%preun proxy-mysql
+if [ $1 -eq 0 ] ; then
+    /bin/systemctl --no-reload disable zabbix-proxy-mysql.service > /dev/null 2>&1 || :
+    /bin/systemctl stop zabbix-proxy-mysql.service > /dev/null 2>&1 || :
+fi
+
+%postun proxy-mysql
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    /bin/systemctl try-restart zabbix-proxy-mysql.service >/dev/null 2>&1 || :
+fi
+
+#----------------------------------------------------------------------------
 
 %package proxy-pgsql
-Summary:         Zabbix proxy compiled to use PostgreSQL
-Group:           Monitoring
-Requires:        %{name}-proxy = %{version}-%{release}
-Requires(post):  systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Provides:        %{name}-proxy-implementation = %{version}-%{release}
+Summary:	Zabbix proxy compiled to use PostgreSQL
+Group:		Monitoring
+Requires:	%{name}-proxy = %{EVRD}
+Requires(post,preun,postun):	systemd-units
+Provides:	%{name}-proxy-implementation = %{EVRD}
 
 %description proxy-pgsql
-The Zabbix proxy compiled to use PostgreSQL
+The Zabbix proxy compiled to use PostgreSQL.
+
+%files proxy-pgsql
+%{_docdir}/%{srcname}-proxy-pgsql-%{version}/
+%{_sbindir}/zabbix_proxy_pgsql
+%{_unitdir}/zabbix-proxy-pgsql.service
+
+%post proxy-pgsql
+if [ $1 -eq 1 ] ; then
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+ln -sf %{_unitdir}/zabbix-proxy-pgsql.service %{_unitdir}/zabbix-proxy.service
+
+%preun proxy-pgsql
+if [ $1 -eq 0 ] ; then
+    /bin/systemctl --no-reload disable zabbix-proxy-pgsql.service > /dev/null 2>&1 || :
+    /bin/systemctl stop zabbix-proxy-pgsql.service > /dev/null 2>&1 || :
+fi
+
+%postun proxy-pgsql
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    /bin/systemctl try-restart zabbix-proxy-pgsql.service >/dev/null 2>&1 || :
+fi
+
+#----------------------------------------------------------------------------
 
 %package proxy-sqlite3
-Summary:         Zabbix proxy compiled to use SQLite
-Group:           Monitoring
-Requires:        %{name}-proxy = %{version}-%{release}
-Requires(post):  systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Provides:        %{name}-proxy-implementation = %{version}-%{release}
+Summary:	Zabbix proxy compiled to use SQLite
+Group:		Monitoring
+Requires:	%{name}-proxy = %{EVRD}
+Requires(post,preun,postun):	systemd-units
+Provides:	%{name}-proxy-implementation = %{EVRD}
 
 %description proxy-sqlite3
-The Zabbix proxy compiled to use SQLite
+The Zabbix proxy compiled to use SQLite.
+
+%files proxy-sqlite3
+%{_docdir}/%{srcname}-proxy-sqlite3-%{version}/
+%{_sbindir}/zabbix_proxy_sqlite3
+%{_unitdir}/zabbix-proxy-sqlite3.service
+
+%post proxy-sqlite3
+if [ $1 -eq 1 ] ; then
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+ln -sf %{_unitdir}/zabbix-proxy-sqlite3.service %{_unitdir}/zabbix-proxy.service
+
+%preun proxy-sqlite3
+if [ $1 -eq 0 ] ; then
+    /bin/systemctl --no-reload disable zabbix-proxy-sqlite3.service > /dev/null 2>&1 || :
+    /bin/systemctl stop zabbix-proxy-sqlite3.service > /dev/null 2>&1 || :
+fi
+
+%postun proxy-sqlite3
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    /bin/systemctl try-restart zabbix-proxy-sqlite3.service >/dev/null 2>&1 || :
+fi
+
+#----------------------------------------------------------------------------
 
 %package web
-Summary:         Zabbix Web Frontend
-Group:           Monitoring
-BuildArch:       noarch
-Requires:        php
-Requires:        php-gd
-Requires:        php-bcmath
-Requires:        php-mbstring
-Requires:        php-xml
-Requires:        php-gettext
-Requires:        dejavu-sans-fonts
-Requires:        %{name} = %{version}-%{release}
-Requires:        %{name}-web-database = %{version}-%{release}
+Summary:	Zabbix Web Frontend
+Group:		Monitoring
+Requires:	php
+Requires:	php-gd
+Requires:	php-bcmath
+Requires:	php-mbstring
+Requires:	php-xml
+Requires:	php-gettext
+Requires:	fonts-ttf-dejavu
+Requires:	%{name} = %{EVRD}
+Requires:	%{name}-web-database = %{EVRD}
+BuildArch:	noarch
 
 %description web
 The php frontend to display the Zabbix web interface.
 
+%files web
+%dir %attr(0750,apache,apache) %{_sysconfdir}/%{srcname}/web
+%ghost %attr(0644,apache,apache) %config(noreplace) %{_sysconfdir}/%{srcname}/web/zabbix.conf.php
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/zabbix.conf
+%{_datadir}/%{srcname}
+
+#----------------------------------------------------------------------------
+
 %package web-mysql
-Summary:         Zabbix web frontend for MySQL
-Group:           Monitoring
-BuildArch:       noarch
-Requires:        %{name}-web = %{version}-%{release}
-Requires:        php-mysql
-Provides:        %{name}-web-database = %{version}-%{release}
-Conflicts:       %{name}-web-pgsql
-Conflicts:       %{name}-web-sqlite3
-Obsoletes:       %{name}-web <= 1.5.3-0.1
+Summary:	Zabbix web frontend for MySQL
+Group:		Monitoring
+Requires:	%{name}-web = %{EVRD}
+Requires:	php-mysql
+Provides:	%{name}-web-database = %{EVRD}
+Conflicts:	%{name}-web-pgsql
+Conflicts:	%{name}-web-sqlite3
+BuildArch:	noarch
 
 %description web-mysql
-Zabbix web frontend for MySQL
+Zabbix web frontend for MySQL.
+
+%files web-mysql
+
+#----------------------------------------------------------------------------
 
 %package web-pgsql
-Summary:         Zabbix web frontend for PostgreSQL
-Group:           Monitoring
-BuildArch:       noarch
-Requires:        %{name}-web = %{version}-%{release}
-Requires:        php-pgsql
-Provides:        %{name}-web-database = %{version}-%{release}
-Conflicts:       %{name}-web-mysql
-Conflicts:       %{name}-web-sqlite3
+Summary:	Zabbix web frontend for PostgreSQL
+Group:		Monitoring
+Requires:	%{name}-web = %{EVRD}
+Requires:	php-pgsql
+Provides:	%{name}-web-database = %{EVRD}
+Conflicts:	%{name}-web-mysql
+Conflicts:	%{name}-web-sqlite3
+BuildArch:	noarch
 
 %description web-pgsql
-Zabbix web frontend for PostgreSQL
+Zabbix web frontend for PostgreSQL.
+
+%files web-pgsql
+
+#----------------------------------------------------------------------------
 
 %package web-sqlite3
-Summary:         Zabbix web frontend for SQLite
-Group:           Monitoring
-BuildArch:       noarch
-Requires:        %{name}-web = %{version}-%{release}
+Summary:	Zabbix web frontend for SQLite
+Group:		Monitoring
+Requires:	%{name}-web = %{EVRD}
 # Need to use the same db file as the server
-Requires:        %{name}-server-sqlite3 = %{version}-%{release}
-Provides:        %{name}-web-database = %{version}-%{release}
-Conflicts:       %{name}-web-mysql
-Conflicts:       %{name}-web-pgsql
+Requires:	%{name}-server-sqlite3 = %{EVRD}
+Provides:	%{name}-web-database = %{EVRD}
+Conflicts:	%{name}-web-mysql
+Conflicts:	%{name}-web-pgsql
+BuildArch:	noarch
 
 %description web-sqlite3
-Zabbix web frontend for SQLite
+Zabbix web frontend for SQLite.
 
+%files web-sqlite3
+
+#----------------------------------------------------------------------------
 
 %prep
 %setup0 -q -n %{srcname}-%{version}
@@ -297,9 +516,7 @@ rm -rf bin
 rm -f frontend/php/images/flash/zbxclock.swf
 %patch2 -p1
 
-
 %build
-
 common_flags="
     --enable-dependency-tracking
     --enable-server
@@ -448,222 +665,3 @@ rm -rf %{buildroot}%{_datadir}/%{srcname}/create
 mkdir -p %{buildroot}%{_sysconfdir}/tmpfiles.d
 install -m 0644 %{SOURCE9} %{buildroot}%{_sysconfdir}/tmpfiles.d/zabbix.conf
 
-
-%pre
-getent group zabbix > /dev/null || groupadd -r zabbix
-getent passwd zabbix > /dev/null || \
-    useradd -r -g zabbix -d %{_localstatedir}/lib/%{srcname} -s /sbin/nologin \
-    -c "Zabbix Monitoring System" zabbix
-:
-
-%post server-mysql
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-ln -sf %{_unitdir}/zabbix-server-mysql.service %{_unitdir}/zabbix-server.service
-
-%post server-pgsql
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-ln -sf %{_unitdir}/zabbix-server-pgsql.service %{_unitdir}/zabbix-server.service
-
-%post server-sqlite3
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-ln -sf %{_unitdir}/zabbix-server-sqlite3.service %{_unitdir}/zabbix-server.service
-
-%post proxy-mysql
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-ln -sf %{_unitdir}/zabbix-proxy-mysql.service %{_unitdir}/zabbix-proxy.service
-
-%post proxy-pgsql
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-ln -sf %{_unitdir}/zabbix-proxy-pgsql.service %{_unitdir}/zabbix-proxy.service
-
-%post proxy-sqlite3
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-ln -sf %{_unitdir}/zabbix-proxy-sqlite3.service %{_unitdir}/zabbix-proxy.service
-
-%post agent
-if [ $1 -eq 1 ] ; then
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-
-
-%preun server-mysql
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable zabbix-server-mysql.service > /dev/null 2>&1 || :
-    /bin/systemctl stop zabbix-server-mysql.service > /dev/null 2>&1 || :
-fi
-
-%preun server-pgsql
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable zabbix-server-pgsql.service > /dev/null 2>&1 || :
-    /bin/systemctl stop zabbix-server-pgsql.service > /dev/null 2>&1 || :
-fi
-
-%preun server-sqlite3
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable zabbix-server-sqlite3.service > /dev/null 2>&1 || :
-    /bin/systemctl stop zabbix-server-sqlite3.service > /dev/null 2>&1 || :
-fi
-
-%preun proxy-mysql
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable zabbix-proxy-mysql.service > /dev/null 2>&1 || :
-    /bin/systemctl stop zabbix-proxy-mysql.service > /dev/null 2>&1 || :
-fi
-
-%preun proxy-pgsql
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable zabbix-proxy-pgsql.service > /dev/null 2>&1 || :
-    /bin/systemctl stop zabbix-proxy-pgsql.service > /dev/null 2>&1 || :
-fi
-
-%preun proxy-sqlite3
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable zabbix-proxy-sqlite3.service > /dev/null 2>&1 || :
-    /bin/systemctl stop zabbix-proxy-sqlite3.service > /dev/null 2>&1 || :
-fi
-
-%preun agent
-if [ $1 -eq 0 ] ; then
-    /bin/systemctl --no-reload disable zabbix-agent.service > /dev/null 2>&1 || :
-    /bin/systemctl stop zabbix-agent.service > /dev/null 2>&1 || :
-fi
-
-
-%postun server-mysql
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart zabbix-server-mysql.service >/dev/null 2>&1 || :
-fi
-
-%postun server-pgsql
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart zabbix-server-pgsql.service >/dev/null 2>&1 || :
-fi
-
-%postun server-sqlite3
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart zabbix-server-sqlite3.service >/dev/null 2>&1 || :
-fi
-
-%postun proxy-mysql
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart zabbix-proxy-mysql.service >/dev/null 2>&1 || :
-fi
-
-%postun proxy-pgsql
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart zabbix-proxy-pgsql.service >/dev/null 2>&1 || :
-fi
-
-%postun proxy-sqlite3
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart zabbix-proxy-sqlite3.service >/dev/null 2>&1 || :
-fi
-
-%postun agent
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    /bin/systemctl try-restart zabbix-agent.service >/dev/null 2>&1 || :
-fi
-
-
-%files
-%doc AUTHORS ChangeLog COPYING NEWS README
-%dir %{_sysconfdir}/%{srcname}
-%config(noreplace) %{_sysconfdir}/tmpfiles.d/zabbix.conf
-%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/lib/%{srcname}
-%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/log/%{srcname}
-%attr(0755,zabbix,zabbix) %dir %{_localstatedir}/run/%{srcname}
-%{_bindir}/zabbix_get
-%{_bindir}/zabbix_sender
-%{_mandir}/man1/zabbix_get.1*
-%{_mandir}/man1/zabbix_sender.1*
-
-%files server
-%doc misc/snmptrap/zabbix_trap_receiver.pl
-%attr(0640,root,zabbix) %config(noreplace) %{_sysconfdir}/zabbix_server.conf
-%{_sysconfdir}/%{srcname}/zabbix_server.conf
-%attr(0755,zabbix,zabbix) %dir %{_sysconfdir}/%{srcname}/externalscripts
-%config(noreplace) %{_sysconfdir}/logrotate.d/zabbix-server
-%ghost %{_unitdir}/zabbix-server.service
-%{_mandir}/man8/zabbix_server.8*
-
-%files server-mysql
-%{_docdir}/%{srcname}-server-mysql-%{version}/
-%{_sbindir}/zabbix_server_mysql
-%{_unitdir}/zabbix-server-mysql.service
-
-%files server-pgsql
-%{_docdir}/%{srcname}-server-pgsql-%{version}/
-%{_sbindir}/zabbix_server_pgsql
-%{_unitdir}/zabbix-server-pgsql.service
-
-%files server-sqlite3
-%{_docdir}/%{srcname}-server-sqlite3-%{version}/
-%{_sbindir}/zabbix_server_sqlite3
-%{_unitdir}/zabbix-server-sqlite3.service
-
-%files agent
-%doc conf/zabbix_agentd/*.conf
-%config(noreplace) %{_sysconfdir}/zabbix_agent.conf
-%{_sysconfdir}/%{srcname}/zabbix_agent.conf
-%config(noreplace) %{_sysconfdir}/zabbix_agentd.conf
-%{_sysconfdir}/%{srcname}/zabbix_agentd.conf
-%config(noreplace) %{_sysconfdir}/logrotate.d/zabbix-agent
-%{_unitdir}/zabbix-agent.service
-%{_sbindir}/zabbix_agent
-%{_sbindir}/zabbix_agentd
-%{_mandir}/man8/zabbix_agentd.8*
-
-%files proxy
-%doc misc/snmptrap/zabbix_trap_receiver.pl
-%attr(0640,root,zabbix) %config(noreplace) %{_sysconfdir}/zabbix_proxy.conf
-%{_sysconfdir}/%{srcname}/zabbix_proxy.conf
-%attr(0755,zabbix,zabbix) %dir %{_sysconfdir}/%{srcname}/externalscripts
-%config(noreplace) %{_sysconfdir}/logrotate.d/zabbix-proxy
-%ghost %{_unitdir}/zabbix-proxy.service
-%{_mandir}/man8/zabbix_proxy.8*
-
-%files proxy-mysql
-%{_docdir}/%{srcname}-proxy-mysql-%{version}/
-%{_sbindir}/zabbix_proxy_mysql
-%{_unitdir}/zabbix-proxy-mysql.service
-
-%files proxy-pgsql
-%{_docdir}/%{srcname}-proxy-pgsql-%{version}/
-%{_sbindir}/zabbix_proxy_pgsql
-%{_unitdir}/zabbix-proxy-pgsql.service
-
-%files proxy-sqlite3
-%{_docdir}/%{srcname}-proxy-sqlite3-%{version}/
-%{_sbindir}/zabbix_proxy_sqlite3
-%{_unitdir}/zabbix-proxy-sqlite3.service
-
-%files web
-%dir %attr(0750,apache,apache) %{_sysconfdir}/%{srcname}/web
-%ghost %attr(0644,apache,apache) %config(noreplace) %{_sysconfdir}/%{srcname}/web/zabbix.conf.php
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/zabbix.conf
-%{_datadir}/%{srcname}
-
-%files web-mysql
-
-%files web-pgsql
-
-%files web-sqlite3
