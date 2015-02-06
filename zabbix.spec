@@ -10,7 +10,7 @@
 Summary:	Open-source monitoring solution for your IT infrastructure
 Name:		zabbix
 Version:	2.0.14
-Release:	1
+Release:	2
 License:	GPLv2+
 Group:		Monitoring
 Url:		http://www.zabbix.com/
