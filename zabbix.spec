@@ -13,7 +13,7 @@ Version:	2.0.14
 Release:	2
 License:	GPLv2+
 Group:		Monitoring
-Url:		http://www.zabbix.com/
+Url:		https://www.zabbix.com/
 Source0:	http://downloads.sourceforge.net/%{srcname}/%{srcname}-%{version}.tar.gz
 # upstream tarball minus src/zabbix_java/lib/org-json-2010-12-28.jar
 #Source0:	%{srcname}-%{version}-free.tar.gz
