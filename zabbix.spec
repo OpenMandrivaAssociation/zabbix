@@ -40,6 +40,11 @@ Patch2:		zabbix-2.0.1-no-flash.patch
 # adapt for fping3 - https://support.zabbix.com/browse/ZBX-4894
 Patch3:		zabbix-1.8.12-fping3.patch
 
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:	systemd-units
 BuildRequires:	mysql-devel
 BuildRequires:	net-snmp-devel
